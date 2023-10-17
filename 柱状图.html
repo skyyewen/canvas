@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>柱状图</title>
+    <style>
+        #canvas{
+            border:1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+        <canvas id="canvas"></canvas>
+</body>
+<script>
+        // 画布大小
+        var canvasWidth='800';
+        var canvasHeight='500';
+        // 三个点坐标
+        var x0=50,y0=50;
+        var x1=50,y1=450;
+        var x2=700,y2=450;
+        // 纵轴文字最大值，递增值
+        var verticalMaxNum=60
+        var verticalStep=10
+        // 横轴
+        var week=[5,20,49,32,13,12,29]
+        var weekMonth=['周一','周二','周三','周四','周五','周六','周日']
+        // 柱状图宽度，柱状图间隔
+        var histogramWidth=60
+        var histogramInterval=90
+        // 柱状图左边距离
+        var histogramLeft=20
+        draw()
+
+
+        
+        function draw() {
+            var canvas = document.getElementById('canvas'),
+            context= canvas.getContext('2d')
+            canvas.width=canvasWidth;
+            canvas.height=canvasHeight;
+            context.beginPath();
+            context.moveTo(x1,y1);
+            context.lineTo(x0,y0-10);
+            context.moveTo(x1,y1);
+            context.lineTo(x2,y2);
+            context.stroke();
+
+            // 纵坐标
+            var verticalStepNum=Math.floor(verticalMaxNum/verticalStep) 
+            console.log(verticalStepNum);
+            var realStep=(y1-y0)/verticalStepNum
+            var vNum=0
+            context.beginPath();
+            for(let i=y1;i>=y0-10;i-=realStep) {
+                // 纵坐标字
+                context.font = '20px Palatino'
+                context.textAlign='right'
+                context.textBaseline='middle'
+                context.fillText(vNum,x0-10,i)
+                vNum+=verticalStep
+                // 虚线
+                if(i>=0) {
+                    context.strokeStyle='#999'
+                    context.setLineDash([2,2]);
+                    context.moveTo(x0,i);
+                    context.lineTo(x2,i);
+                    context.stroke();
+                }
+            }
+
+            // 横坐标
+            var xheng=histogramLeft+x1
+            var weekReal=[]
+            for(let i=0;i<week.length;i++) {
+                weekReal.push(week[i]/verticalMaxNum*(y1-y0))
+            }
+            var index=0
+            for(let i=0;i<week.length;i++) {
+                // 每个循环随机一个颜色 
+                var r=Math.floor(Math.random()*255)
+                var g=Math.floor(Math.random()*255)
+                var b=Math.floor(Math.random()*255)
+                context.fillStyle=`rgba(${r},${g},${b},1)`
+
+                context.font = '20px Palatino'
+                context.textAlign='center'
+                context.textBaseline='bottom'
+                context.fillText(week[index],xheng+histogramWidth/2,y1-weekReal[i])
+
+                context.textAlign='center'
+                context.textBaseline='hanging'
+                context.fillText(weekMonth[index],xheng+histogramWidth/2,y1)
+                context.fillRect(xheng,y1-weekReal[i],histogramWidth,weekReal[i])
+                xheng+=histogramInterval
+                index++
+            }
+        }
+
+
+</script>
+</html>
