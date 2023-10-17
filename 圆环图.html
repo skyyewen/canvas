@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>饼图</title>
+    <style>
+        #canvas{
+            border:1px solid #ccc;
+        }
+        .coverDiv {
+            position: absolute;
+            display: none;
+            z-index: 999999999;
+            left: 0;
+            top: 0;
+            background-color: #fff;
+            border-style: solid;
+            white-space: nowrap;
+            z-index: 9999999;
+            background-color: rgba(50, 50, 50, 0.7);
+            border-width: 0px;
+            border-color: rgb(51, 51, 51);
+            border-radius: 4px;
+            color: rgb(255, 255, 255);
+            font: 14px / 21px "Microsoft YaHei";
+            padding: 5px;
+        }
+        .title {
+            position: absolute;
+            left: 300px;
+            top: 35px;
+            font-size: 26px;
+        }
+    </style>
+</head>
+<body>
+        <canvas id="canvas"></canvas>
+        <div class="coverDiv"></div>
+        <div class="title">周一到周五的人数</div>
+</body>
+<script>
+        var inputData =[21,12,51,35,63]
+        var inputText =['星期一','星期二','星期三','星期四','星期五']
+        var colorList=['#000','skyblue','#666','pink','red']
+        var title='周一到周五的人数'
+
+        //小矩形距横向间距
+        var spaceX=10;
+        //小矩形距纵向间距
+        var spaceY=20;
+        //小矩形的宽度
+        var smallW=30;
+        //小矩形的宽度
+        this.smallH=15;
+
+
+
+
+
+
+        
+        // 鼠标移动是坐标
+        var  mousePosition= {}
+        var mouseTimer
+
+        // div覆盖显示
+        var isSelect=false
+        var coverDiv=document.querySelector('.coverDiv')
+        var isMouseIn=false
+        var isMouseSpace=false
+
+        // 画布大小
+        var canvasWidth='800';
+        var canvasHeight='650';
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        canvas.width=canvasWidth;
+        canvas.height=canvasHeight;
+        draw()
+
+        function drawDonuts(startAngle,endAngle,data,i){
+            // 外圆
+            context.beginPath();
+            context.moveTo(400,350);
+            context.arc(400, 350, 200, startAngle, endAngle, false);
+            var isSelect=context.isPointInPath(mousePosition.x, mousePosition.y)
+            if (isSelect&&isMouseSpace) {
+                context.closePath();
+                context.beginPath();
+                context.moveTo(400,350);
+                context.arc(400, 350, 210, startAngle, endAngle, false);
+                coverDiv.style.left=mousePosition.x+10+'px'
+                coverDiv.style.top=mousePosition.y+10+'px'
+                coverDiv.style.display='block'
+                let rate=data.scale.toFixed(2)*100
+                rate=rate.toFixed(0)
+                coverDiv.innerHTML=`${title}<br>${inputText[i]}: ${inputData[i]} ${rate}%`
+            }
+            context.closePath();
+            context.fillStyle = data.color;
+            context.fill()
+            // 内圆覆盖
+            context.beginPath();
+            context.moveTo(400,350);
+            context.arc(400, 350, 100, startAngle, endAngle, false);
+            context.closePath();
+            context.fillStyle = '#fff';
+            context.fill()
+            context.strokeStyle = '#fff';
+            context.stroke();
+            context.strokeStyle = '#fff';
+            // 去白边
+            context.lineWidth = 2;
+            context.stroke();
+        }
+        function handleData(inputData) {
+            // 把inputData变成比例
+            let dataNew = [];
+            let total = 0;
+            for (var i = 0; i < inputData.length; i++) {
+                total += inputData[i];
+            }
+            var radianStart=0
+            for (var i = 0; i < inputData.length; i++) {
+                radianStart =radianStart+ inputData[i] / total * Math.PI * 2;
+                let radian=radianStart-inputData[i] / total * Math.PI * 2/2
+                dataNew[i] = {
+                    scale: inputData[i] / total,
+                    color: colorList[i],
+                    radian: radian
+                }
+            }
+            return dataNew
+        }
+        function draw(){
+            context.clearRect(0, 0, 800, 800);
+            var data=handleData(inputData)
+            var startAngle=0;
+            var endAngle=0;
+            for(let i=0;i<data.length;i++)
+            {
+                endAngle=startAngle+data[i].scale*Math.PI*2;
+                drawDonuts(startAngle,endAngle,data[i],i);
+                startAngle=endAngle;
+                drawInfo(i,inputText[i],colorList[i])
+            }
+        }
+        canvas.addEventListener('mousemove', (e) => {
+            e = e || window.event;
+            if ( e.ofSfsetX || e.offsetX==0 ) {
+                mousePosition.x = e.offsetX;
+                mousePosition.y = e.offsetY;
+            } else if ( e.layerX || e.layerX==0 ){
+                mousePosition.x = e.layerX;
+                mousePosition.y = e.layerY;
+            } 
+            draw();
+            // 计算鼠标位置与圆心距离
+            const distance = Math.sqrt((e.offsetX - 400) ** 2 + (e.offsetY - 350) ** 2);
+            // 判断是否在饼图内部
+            isMouseIn = distance < 200;
+            isMouseSpace=distance>100
+            if(!isMouseIn||distance<100) {
+                coverDiv.style.display='none'
+            }
+        });
+        //添加说明
+        function drawInfo (index,text,color) {
+            context.beginPath();
+            context.fillStyle=color
+            context.fillRect( spaceX, spaceY*index+ smallH, smallW, smallH);
+            //画文字
+            context.font = "12px 微软雅黑";
+            context.fillStyle = color;
+            context.textAlign="left";
+            context.textBaseline="bottom";
+            context.fillText(text, spaceX*2+ smallW, spaceY*index+ smallH*2);
+        }
+
+</script>
+</html>
