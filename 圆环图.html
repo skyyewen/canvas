@@ -31,11 +31,19 @@
             top: 35px;
             font-size: 26px;
         }
+        .center {
+            display: none;
+            position: absolute;
+            left: 373px;
+            top: 337px;
+            font-size: 26px;
+        }
     </style>
 </head>
 <body>
         <canvas id="canvas"></canvas>
         <div class="coverDiv"></div>
+        <div class="center">星期二</div>
         <div class="title">周一到周五的人数</div>
 </body>
 <script>
@@ -66,6 +74,7 @@
         // div覆盖显示
         var isSelect=false
         var coverDiv=document.querySelector('.coverDiv')
+        var centerDiv=document.querySelector('.center')
         var isMouseIn=false
         var isMouseSpace=false
 
@@ -95,6 +104,8 @@
                 let rate=data.scale.toFixed(2)*100
                 rate=rate.toFixed(0)
                 coverDiv.innerHTML=`${title}<br>${inputText[i]}: ${inputData[i]} ${rate}%`
+                centerDiv.style.display='block'
+                centerDiv.innerHTML=`${inputText[i]}`
             }
             context.closePath();
             context.fillStyle = data.color;
@@ -162,6 +173,7 @@
             isMouseSpace=distance>100
             if(!isMouseIn||distance<100) {
                 coverDiv.style.display='none'
+                centerDiv.style.display='none'
             }
         });
         //添加说明
